@@ -315,6 +315,10 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             if key in payload:
                 payload[key] = ts
 
+        # Local test economy: force gold (credits) to 10,000 on player payloads
+        if isinstance(payload, dict) and "credits" in payload:
+            payload["credits"] = 10000
+
         if "basesaveid" in payload:
             payload["basesaveid"] = ts
         if "savetime" in payload:
@@ -643,7 +647,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             "first_name": "Commander",
             "pic_square": "",
             "acceptedtosversion": "1",
-            "credits": 48,
+            "credits": 10000,
             "currenttime": ts,
             "time": ts,
             "server_time": ts,
@@ -757,6 +761,8 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
                 resources[key] = int(floor_value)
 
         current_credits = self._safe_int(base.get("credits"), 0)
+        if current_credits < 10000:
+            base["credits"] = 10000
         if current_credits < 500:
             base["credits"] = 500
 
@@ -2007,7 +2013,7 @@ class CustomHandler(http.server.SimpleHTTPRequestHandler):
             "email": "local@example.com",
             "input_email": "local@example.com",
             "settings": {"o1": {"news": 1, "att": 0}},
-            "credits": 48,
+            "credits": 10000,
             "app_id": "local_app",
             "client_key": "local_client_key",
             "version": 7,
