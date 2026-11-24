@@ -3017,6 +3017,28 @@
 
     // --- PATCH: Login Process ---
     // --- PATCH: Login Process ---
+
+    // --- PATCH: Local store busy reset (sandbox clone: no live purchase gateway) ---
+    function patchLocalStoreBusyReset() {
+        if (window.__localStoreBusyFix) return;
+        window.__localStoreBusyFix = true;
+        console.warn("[PATCH V33] Local store busy reset enabled.");
+        setInterval(function () {
+            try {
+                var hx = window._hx_classes || {};
+                var STORE = hx["STORE"] || hx["com.cc.ui.STORE"];
+                var reset = false;
+                if (STORE && STORE._busy === true) { STORE._busy = false; reset = true; console.warn("[PATCH V33] STORE._busy force-reset (local mode)."); }
+                if (STORE && STORE.hasPendingPurchase === true) { STORE.hasPendingPurchase = false; reset = true; }
+                if (reset && STORE && STORE.storeUpdatedSignal && STORE.storeUpdatedSignal.dispatch) {
+                    try { STORE.storeUpdatedSignal.dispatch(); } catch (eS) { }
+                }
+                var G = hx["GLOBAL"];
+                if (G && G.hasPendingPurchase === true) { G.hasPendingPurchase = false; }
+            } catch (e) { }
+        }, 1500);
+    }
+
     function patchLoginProcess() {
         var LOGIN = (window._hx_classes && window._hx_classes["LOGIN"]);
         if (LOGIN && !LOGIN.__patchedProcess) {
@@ -4851,6 +4873,7 @@
         patchPlatoonManifestDefaults();
         patchUpdatesCheck();
         patchStoreSafety();
+        patchLocalStoreBusyReset();
         patchHudMapButtonsFallback();
         patchWorldmapDragInputFallback();
         patchWorldmapNavigationSafety();
@@ -4931,6 +4954,7 @@
         patchUnitCardSafety();
         patchUpdatesCheck();
         patchStoreSafety();
+        patchLocalStoreBusyReset();
         patchHudMapButtonsFallback();
         patchWorldmapDragInputFallback();
         patchWorldmapNavigationSafety();
